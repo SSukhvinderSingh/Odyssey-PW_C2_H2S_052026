@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Odyssey | Your Personalized Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script defer src="js/translations.js"></script>
+    <script defer src="js/utils.js"></script>
+    <script defer src="js/ai-guide.js"></script>
+    <script defer src="js/app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, .font-serif { font-family: 'Playfair Display', serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .accent-bg { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Navigation -->
+    <nav class="glass-panel sticky top-0 z-40 p-4 flex justify-between items-center shadow-sm transition-all duration-300">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 accent-bg rounded-lg flex items-center justify-center text-slate-900 shadow-sm">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <span id="nav-title" class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Election Odyssey</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-language text-slate-400 dark:text-slate-500"></i>
+                <select id="lang-selector" class="text-sm bg-transparent outline-none text-slate-600 dark:text-slate-300 font-medium cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                </select>
+            </div>
+            <button id="btn-restart" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium transition-colors">
+                <i class="fas fa-redo mr-1"></i> <span data-i18n="btn_restart">Restart Journey</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
+        
+        <!-- AI Assistant Bubble -->
+        <div id="ai-bubble" class="fixed bottom-6 right-6 z-50 cursor-pointer transition-all hover:scale-110 group">
+            <div class="absolute -top-12 right-0 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold px-3 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-100 dark:border-slate-700">
+                Ask your Guide! <i class="fas fa-arrow-up ml-1"></i>
+            </div>
+            <div class="w-16 h-16 accent-bg rounded-full shadow-2xl flex items-center justify-center text-slate-900 text-2xl border-4 border-white dark:border-slate-900">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+        
+        <!-- AI Chat Window -->
+        <div id="ai-chat" class="fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] glass-panel rounded-2xl shadow-2xl flex flex-col hidden transition-all transform translate-y-4 opacity-0">
+            <div class="gradient-bg p-4 rounded-t-2xl text-white flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-robot"></i>
+                    <span class="font-bold">Odyssey AI Guide</span>
+                </div>
+                <button id="btn-close-chat" class="hover:text-slate-300 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                <!-- Messages injected here -->
+            </div>
+        
+            <div id="ai-suggestions" class="hidden p-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2 bg-slate-50/50 dark:bg-slate-900/50">
+                <!-- Suggestions injected here -->
+            </div>
+        
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="chat-input" 
+                           class="flex-grow px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-amber-500 transition-all text-slate-800 dark:text-slate-200"
+                           data-i18n-placeholder="ai_input_placeholder"
+                           placeholder="Ask about ECI process...">
+                    <button id="btn-send-chat" class="w-10 h-10 accent-bg text-slate-900 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity shadow-md">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="btn-voice-listen" class="flex items-center space-x-2 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors">
+                        <i class="fas fa-microphone"></i> <span data-i18n="ai_btn_speak">Speak</span>
+                    </button>
+                    <button id="btn-voice-toggle" class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                        <i class="fas fa-volume-up"></i> <span data-i18n="ai_btn_voice_res">Voice Response:</span> <span id="voice-status">ON</span>
+                    </button>
+                    <button id="btn-stop-speech" class="flex items-center space-x-2 text-xs font-bold text-red-600 hover:text-red-800 transition-colors">
+                        <i class="fas fa-stop"></i> <span data-i18n="ai_btn_stop">Stop</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 1: Intro/Onboarding -->
+        <div id="screen-intro" class="text-center space-y-8 py-20 screen-transition">
+            <div class="inline-block p-4 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl mb-6 animate-fade-in-up">
+                <i class="fas fa-compass fa-3x"></i>
+            </div>
+            <div class="space-y-4 animate-fade-in-up stagger-1">
+                <h1 id="intro-title" data-i18n="intro_title" class="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight max-w-3xl mx-auto leading-tight">
+                    Chart Your Course to the Indian Ballot
+                </h1>
+                <p id="intro-desc" data-i18n="intro_desc" class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Navigating the ECI procedures can be complex. We transform them into a personalized Odyssey—ensuring every Indian citizen moves from uninformed to vote cast with 100% accuracy.
+                </p>
+            </div>
+            <div class="pt-8 animate-fade-in-up stagger-2">
+                <button id="btn-begin-journey" data-i18n="btn_begin"
+                        class="accent-bg text-slate-900 px-10 py-4 rounded-full font-bold text-xl shadow-xl hover:scale-105 transition-all active:scale-95">
+                    Begin Your Journey <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Screen 2: Persona Discovery -->
+        <div id="screen-persona" class="hidden max-w-3xl mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 screen-transition">
+            <h2 id="persona-title" data-i18n="persona_title" class="text-3xl font-bold text-slate-800 dark:text-white mb-2 text-center">Who are you in this Odyssey?</h2>
+            <p id="persona-desc" data-i18n="persona_desc" class="text-slate-500 dark:text-slate-400 text-center mb-10">Select the category that best describes you to tailor your roadmap.</p>
+            
+            <form id="persona-form" class="space-y-10">
+                <div class="animate-fade-in-up stagger-1">
+                    <label id="label-name" data-i18n="label_name" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Your Name</label>
+                    <input type="text" id="input-name" required 
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                           placeholder="e.g. Alex Smith">
+                </div>
+        
+                <div class="animate-fade-in-up stagger-2">
+                    <label id="label-status" data-i18n="label_status" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Your Voter Status</label>
+                    <div id="persona-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group" data-persona="FTV">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_ftv_title">First-Time Voter</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_ftv_desc">I've never voted before / Just turned 18</div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 transition-all group" data-persona="EV">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_ev_title">Existing Voter</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_ev_desc">I have voted in previous elections</div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-all group" data-persona="NRI">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_nri_title">NRI / Overseas</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_nri_desc">I live abroad and want to vote</div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-all group" data-persona="SV">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_sv_title">Shifted Residence</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_sv_desc">I have moved to a new address</div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-red-400 dark:hover:border-red-500 transition-all group md:col-span-2" data-persona="EOV">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_eov_title">Election Official / Volunteer</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_eov_desc">I am a BLO or election staff</div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="persona-card p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-all group md:col-span-2" data-persona="CUSTOM">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center group-hover:bg-slate-600 group-hover:text-white transition-colors shadow-sm">
+                                    <i class="fas fa-pen"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 dark:text-white" data-i18n="card_custom_title">Something else...</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="card_custom_desc">I\'ll describe my situation manually</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div id="custom-bio-container" class="hidden mt-6 space-y-2 animate-fade-in-up">
+                        <label id="label-custom-bio" data-i18n="label_custom_bio" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tell us more about your situation</label>
+                        <textarea id="input-bio" rows="3"
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                                    placeholder="Describe your situation..."></textarea>
+                    </div>
+                </div>
+        
+                <button type="submit" data-i18n="btn_map" class="w-full accent-bg text-slate-900 py-4 rounded-xl font-bold text-lg shadow-lg hover:opacity-90 transition-all active:scale-95 animate-fade-in-up stagger-3">
+                    Map My Journey <i class="fas fa-magic ml-2"></i>
+                </button>
+            </form>
+        </div>
+        
+        <!-- Screen 3: The Odyssey (Timeline) -->
+        <div id="screen-odyssey" class="hidden space-y-8 screen-transition">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 id="welcome-text" class="text-4xl font-bold text-slate-900 dark:text-white">Your Odyssey</h2>
+                    <div class="flex items-center mt-3">
+                        <span id="persona-badge" class="px-3 py-1 rounded-full text-xs font-bold text-white bg-slate-600 dark:bg-slate-700 shadow-sm">Persona</span>
+                        <span class="mx-2 text-slate-300 dark:text-slate-600">•</span>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Journey Map v1.0</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 text-sm font-bold text-slate-800 dark:text-slate-200 bg-amber-100 dark:bg-amber-900/30 px-5 py-2 rounded-full border border-amber-200 dark:border-amber-800 shadow-sm">
+                    <i class="fas fa-calendar-alt text-amber-600 dark:text-amber-400"></i>
+                    <span>Election Day: Nov 3, 2026</span>
+                </div>
+            </header>
+            
+            <div id="timeline-container" class="timeline-path space-y-6 py-4">
+                <!-- Timeline items will be injected here -->
+            </div>
+            
+            <footer class="text-center pt-16 pb-12">
+                <p class="text-slate-400 dark:text-slate-500 text-sm italic max-w-md mx-auto">
+                    Every step is sourced from official government standards to ensure 100% procedural accuracy.
+                </p>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Scripts moved to head with defer -->
+</body>
+</html>

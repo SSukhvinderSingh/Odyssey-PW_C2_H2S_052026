@@ -41,6 +41,10 @@ const AI_GUIDE = {
         synthesis: window.speechSynthesis,
         isVoiceEnabled: true,
 
+        /**
+         * Initializes the Web Speech Recognition API for voice input.
+         * Sets up language to Indian English (en-IN) and non-continuous mode.
+         */
         init() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
@@ -51,6 +55,10 @@ const AI_GUIDE = {
             }
         },
 
+        /**
+         * Speaks a given text string using the Web Speech Synthesis API.
+         * @param {string} text - The text to be spoken aloud.
+         */
         speak(text) {
             if (!this.isVoiceEnabled) return;
             this.synthesis.cancel();
@@ -60,10 +68,17 @@ const AI_GUIDE = {
             this.synthesis.speak(utterance);
         },
 
+        /**
+         * Immediately stops any ongoing speech synthesis playback.
+         */
         stop() {
             this.synthesis.cancel();
         },
 
+        /**
+         * Starts the speech recognition listener and returns the transcript via callback.
+         * @param {Function} callback - Called with the transcribed text string once speech is detected.
+         */
         listen(callback) {
             if (!this.recognition) {
                 alert("Voice recognition not supported in this browser.");
@@ -94,6 +109,14 @@ const AI_GUIDE = {
         }
     },
 
+    /**
+     * Sends a prompt and conversation history to the Cloudflare Worker proxy,
+     * which forwards it to the Gemini 2.5 Flash API and returns a response.
+     * @param {string} prompt - The user's question or input text.
+     * @param {Object} context - Additional context (persona, userName).
+     * @param {Array} history - Previous conversation history for context-aware responses.
+     * @returns {Promise<string>} The AI's text response, or a fallback error message.
+     */
     async askLLM(prompt, context, history = []) {
         try {
             const response = await fetch(this.config.workerUrl, {
@@ -129,6 +152,12 @@ const AI_GUIDE = {
         }
     },
 
+    /**
+     * Uses the Gemini AI to classify a freeform user bio into one of 5 persona IDs.
+     * Falls back to 'UNKNOWN' if classification fails.
+     * @param {string} bio - The user's freeform description of their voter situation.
+     * @returns {Promise<string>} The matched persona ID (e.g., 'FTV', 'NRI').
+     */
     async mapPersonaAI(bio) {
         const prompt = `Analyze this user description: "${bio}". 
         Categorize them into EXACTLY one of these persona IDs:

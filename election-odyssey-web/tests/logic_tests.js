@@ -14,6 +14,10 @@ try {
         { input: "I am a BLO volunteer", expected: 'EOV' },
         { input: "I have voted before", expected: 'EV' },
         { input: "Random text", expected: 'UNKNOWN' },
+        // Edge cases
+        { input: "", expected: 'UNKNOWN' },
+        { input: null, expected: 'UNKNOWN' },
+        { input: "This is an extremely long and convoluted string that eventually mentions that the user lives abroad as an NRI voter.", expected: 'NRI' }
     ];
 
     testCases.forEach(({ input, expected }, i) => {

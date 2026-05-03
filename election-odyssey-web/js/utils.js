@@ -48,6 +48,11 @@ const MILESTONES = {
     ]
 };
 
+/**
+ * Maps a given user input string to a specific voter persona.
+ * @param {string} input - The raw text input from the user describing their situation.
+ * @returns {Object} The matched persona object from the PERSONAS dictionary, or an UNKNOWN fallback.
+ */
 function mapPersona(input) {
     const text = (input || "").toLowerCase();
     if (text.includes('first time') || text.includes('never voted') || (text.includes('18') && text.includes('start'))) return PERSONAS.FTV;
@@ -58,6 +63,12 @@ function mapPersona(input) {
     return { id: 'UNKNOWN', name: 'Undetermined', tone: 'neutral', focus: 'General Indian election information', color: 'gray' };
 }
 
+/**
+ * Generates a localized timeline with milestones based on the selected persona and the election date.
+ * @param {string} personaId - The unique ID of the persona (e.g., 'FTV', 'NRI').
+ * @param {string} electionDateStr - The official election date string (e.g., '2026-11-03').
+ * @returns {Array<Object>} An array of milestone objects with calculated deadlines and status flags.
+ */
 function generateTimeline(personaId, electionDateStr) {
     const electionDate = new Date(electionDateStr);
     const today = new Date();

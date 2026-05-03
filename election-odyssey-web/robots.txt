@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ssukhvindersingh.github.io/Odyssey-PW_C2_H2S_052026/sitemap.xml

@@ -1,6 +1,8 @@
 /**
  * Election Odyssey - India Edition
  * Main application logic
+ * @version 1.3.0
+ * @author SSukhvinderSingh
  */
 
 console.log('🚀 app.js: Script loading started...');
@@ -9,14 +11,17 @@ const app = {
     state: {
         persona: null,
         timeline: [],
-        electionDate: '2026-11-03', 
+        electionDate: typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.electionDate : '2026-11-03', 
         userName: '',
         chatHistory: [],
         completedMilestones: [],
         hasCompletedOnboarding: false,
-        language: 'en'
+        language: typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.defaultLanguage : 'en'
     },
 
+    /**
+     * Initializes the application: caches DOM, binds events, loads state, and renders UI.
+     */
     init() {
         console.log('Odyssey App: Initializing...');
         try {
@@ -27,6 +32,12 @@ const app = {
             this.render();
             if (window.AI_GUIDE && window.AI_GUIDE.voice) {
                 window.AI_GUIDE.voice.init();
+            }
+            
+            // Set dynamic config variables
+            const configDateSpan = document.getElementById('config-election-date');
+            if (configDateSpan && typeof APP_CONFIG !== 'undefined') {
+                configDateSpan.innerText = `Election Day: ${APP_CONFIG.electionDate}`;
             }
             console.log('✅ Odyssey App: Initialized successfully');
         } catch (e) {
@@ -235,6 +246,11 @@ const app = {
         }
     },
 
+    /**
+     * Handles sending a user query to the AI and rendering the response.
+     * Maintains a rolling chat history of up to 20 messages for context.
+     * @param {string|null} overrideQuery - Optional query to send instead of the chat input value.
+     */
     async handleAIChat(overrideQuery = null) {
         const query = overrideQuery || this.chatInput.value.trim();
         if (!query) return;
@@ -321,6 +337,10 @@ const app = {
         }
     },
 
+    /**
+     * Handles the persona form submission, mapping the user to a persona
+     * and generating their personalized ECI election timeline.
+     */
     async handlePersonaSubmission() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
@@ -376,7 +396,7 @@ const app = {
         sortedTimeline.forEach(m => {
             const isCompleted = this.state.completedMilestones?.includes(m.id);
             const item = document.createElement('div');
-            item.className = `p-4 mb-4 rounded-lg border-l-4 transition-all ${isCompleted ? 'bg-slate-100 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 opacity-60' : this.getStatusStyle(m.status)}`;
+            item.className = `p-4 mb-4 rounded-xl transition-all ${isCompleted ? 'bg-slate-100 dark:bg-slate-800/50 opacity-60' : this.getStatusStyle(m.status)}`;
             const resourceLink = window.AI_GUIDE.resources[m.text.split(' ').slice(0,3).join(' ')] || '';
             const linkHtml = resourceLink ? `<a href="${resourceLink}" target="_blank" class="text-xs text-amber-600 dark:text-amber-400 hover:underline ml-2"><i class="fas fa-external-link-alt"></i> Official Link</a>` : '';
             item.innerHTML = `
@@ -400,6 +420,10 @@ const app = {
         });
     },
 
+    /**
+     * Marks or unmarks a milestone as completed and saves state.
+     * @param {string} id - The unique ID of the milestone to toggle.
+     */
     toggleMilestone(id) {
         if (!this.state.completedMilestones) this.state.completedMilestones = [];
         if (this.state.completedMilestones.includes(id)) {
@@ -413,9 +437,9 @@ const app = {
 
     getStatusStyle(status) {
         switch(status) {
-            case 'urgent': return 'bg-red-50 dark:bg-red-900/20 border-red-500';
-            case 'missed': return 'bg-slate-100 dark:bg-slate-800 border-slate-400 opacity-60';
-            default: return 'bg-white dark:bg-slate-800 border-amber-500';
+            case 'urgent': return 'bg-red-50 dark:bg-red-900/20 ring-1 ring-red-500/40';
+            case 'missed': return 'bg-slate-100 dark:bg-slate-800 opacity-60';
+            default: return 'bg-white dark:bg-slate-800';
         }
     },
         

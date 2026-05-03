@@ -53,17 +53,6 @@
     position: relative;
 }
 
-.timeline-path::before {
-    content: '';
-    position: absolute;
-    left: 1.25rem;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--civic-gold), var(--civic-navy));
-    z-index: 0;
-}
-
 /* Persona Card Glow */
 .persona-card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

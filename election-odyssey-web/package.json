@@ -1,18 +1,20 @@
 {
   "name": "election-odyssey-web",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.3.0",
+  "description": "Election Odyssey - India Edition. A personalized interactive guide to the ECI voting process.",
   "main": "service-worker.js",
+  "author": "SSukhvinderSingh",
+  "license": "ISC",
+  "type": "commonjs",
+  "keywords": ["election", "india", "ECI", "voter", "guide", "PWA"],
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node tests/logic_tests.js && node tests/frontend_audit_test.js",
+    "test:logic": "node tests/logic_tests.js",
+    "test:audit": "node tests/frontend_audit_test.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "jsdom": "^29.1.1"
   }
